@@ -1,0 +1,47 @@
+=// Script Task code				
+using System;				
+using System.IO;				
+using System.Data;				
+using System.Data.SqlClient;				
+				
+public void Main()				
+{				
+    // Read data from CSV file				
+    string filePath = @"D:\Data.csv";				
+    string[] lines = File.ReadAllLines(filePath);				
+				
+    // Process data				
+    DataTable dt = new DataTable();				
+    dt.Columns.Add("Name");				
+    dt.Columns.Add("Age");				
+    dt.Columns.Add("Country");				
+				
+    // Skip header row				
+    for (int i = 1; i < lines.Length; i++)				
+    {				
+        string[] columns = lines[i].Split('	');			
+        dt.Rows.Add(columns[0]	 columns[1]	 columns[2]);		
+    }				
+				
+    // Write data to database table				
+    string connectionString = "Data Source=c8cafd30abc15d2;Initial Catalog=Sales;Integrated Security=True;";				
+    string query = "INSERT INTO Customers (Name	 Age	 Country) VALUES (@Name	 @Age	 @Country)";
+				
+    using (SqlConnection connection = new SqlConnection(connectionString))				
+    {				
+        connection.Open();				
+				
+        foreach (DataRow row in dt.Rows)				
+        {				
+            using (SqlCommand command = new SqlCommand(query	 connection))			
+            {				
+                command.Parameters.AddWithValue("@Name"	 row["Name"]); // parameter for Name column			
+                command.Parameters.AddWithValue("@Age"	 int.Parse(row["Age"].ToString())); // parameter for Age column			
+                command.Parameters.AddWithValue("@Country"	 row["Country"]); // parameter for Country column			
+                command.ExecuteNonQuery();				
+            }				
+        }				
+    }				
+				
+    Dts.TaskResult = (int)ScriptResults.Success;				
+}				
